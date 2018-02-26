@@ -6,9 +6,10 @@ mndata = MNIST('samples')
 images, labels = mndata.load_training()
 
 classifier = MLPClassifier(
-    solver='lbfgs',
-    alpha=1e-5,
-    hidden_layer_sizes=(50,),
+    solver='sgd',
+    alpha=0.0001,
+    verbose=True,
+    hidden_layer_sizes=(70,),
     random_state=1
 )
 
