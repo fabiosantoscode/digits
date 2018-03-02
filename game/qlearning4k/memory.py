@@ -16,7 +16,7 @@ class Memory:
 
 class ExperienceReplay(Memory):
 
-    def __init__(self, memory_size=100, fast=True):
+    def __init__(self, memory_size=1000, fast=True):
         self.fast = fast
         self.memory = []
         self._memory_size = memory_size
@@ -32,7 +32,7 @@ class ExperienceReplay(Memory):
             return self.get_batch_fast(model, batch_size, gamma)
         if len(self.memory) < batch_size:
             batch_size = len(self.memory)
-        nb_actions = model.output_shape[-1]
+        nb_actions = model.get_output_shape_at(-1)
         samples = np.array(sample(self.memory, batch_size))
         input_dim = np.prod(self.input_shape)
         S = samples[:, 0 : input_dim]

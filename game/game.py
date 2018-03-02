@@ -17,8 +17,8 @@ def find_runner(track):
 
 turn_speed = 0.3
 
-class Game(object):
-    def __init__(self, track):
+class Game:
+    def __init__(self, track=track):
         self.track = track
         self.reset()
 
@@ -30,7 +30,6 @@ class Game(object):
         self.result = None
         self.steps = 0
 
-    @property
     def is_won(self):
         return self.steps >= 100
 
@@ -62,22 +61,10 @@ class Game(object):
         return sensors
 
     def get_score(self):
-        return len(self.get_sensor_matrix(all=False))
+        return len(self.get_sensor_matrix(all=False)) - (self.steps / 10)
 
     def get_frame(self):
         return np.array(self.get_sensor_matrix(all=True, as_bools=True))
-
-    def continuous_play(self, network):
-        max = float('inf')
-        if hasattr(self, 'max_episode_steps'):
-            max = self.max_episode_steps
-        step = 0
-        while step < max and not self.ended:
-            step += 1
-            action = random.choice([-1, 1])
-            reward = self.step(action)
-            print('action: ', action, 'reward:', reward)
-            self.display()
 
     def display(self):
         eel.drawGame(self.to_json())
@@ -88,8 +75,13 @@ class Game(object):
     def action_space(self):
         return [-1, 1]
 
+    def get_possible_actions(self):
+        return [0, 1]
+
     def play(self, action):
-        assert action in self.action_space(), "expected action to be -1 or 1, was {}".format(action)
+        # assert action in self.action_space(), "expected action to be -1 or 1, was {}".format(action)
+        assert action in [0, 1]
+        action = self.action_space()[action]
         self.steps += 1
         x, y, angle = self.runner
         angle += action * turn_speed
@@ -102,10 +94,6 @@ class Game(object):
             self.ended = True
         else:
             self.runner = (x, y, angle)
-
-        reward = len(self.get_sensor_matrix(all=False))
-
-        return self.get_as_state(), reward, self.ended
 
     def to_json(self):
         return {

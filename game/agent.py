@@ -56,7 +56,7 @@ class Agent:
     def clear_frames(self):
         self.frames = None
 
-    def train(self, game, nb_epoch=1000, batch_size=50, gamma=0.9, epsilon=[1., .1], epsilon_rate=0.5, reset_memory=False, observe=0, checkpoint=None):
+    def train(self, game, nb_epoch=1000, batch_size=50, gamma=0.9, epsilon=[1., .1], epsilon_rate=0.5, reset_memory=False, observe=0, checkpoint=None, display=False):
         self.check_game_compatibility(game)
         if type(epsilon)  in {tuple, list}:
             delta =  ((epsilon[0] - epsilon[1]) / (nb_epoch * epsilon_rate))
@@ -82,6 +82,9 @@ class Agent:
                     q = model.predict(S)
                     a = int(np.argmax(q[0]))
                 game.play(a)
+                if display:
+                    game.display()
+
                 r = game.get_score()
                 S_prime = self.get_game_data(game)
                 game_over = game.is_over()
@@ -92,6 +95,10 @@ class Agent:
                     batch = self.memory.get_batch(model=model, batch_size=batch_size, gamma=gamma)
                     if batch:
                         inputs, targets = batch
+                        import math
+                        if math.isnan(targets[0][0]):
+                            # import pdb; pdb.set_trace()
+                            pass
                         loss += float(model.train_on_batch(inputs, targets))
                 if checkpoint and ((epoch + 1 - observe) % checkpoint == 0 or epoch + 1 == nb_epoch):
                     model.save_weights('weights.dat')
@@ -110,8 +117,6 @@ class Agent:
             game.reset()
             self.clear_frames()
             S = self.get_game_data(game)
-            if visualize:
-                frames.append(game.draw())
             game_over = False
             while not game_over:
                 if np.random.rand() < epsilon:
@@ -125,15 +130,9 @@ class Agent:
                 game.play(action)
                 S = self.get_game_data(game)
                 if visualize:
-                    frames.append(game.draw())
+                    game.display()
                 game_over = game.is_over()
             if game.is_won():
                 win_count += 1
         print("Accuracy {} %".format(100. * win_count / nb_epoch))
-        if visualize:
-            if 'images' not in os.listdir('.'):
-                os.mkdir('images')
-            for i in range(len(frames)):
-                plt.imshow(frames[i], interpolation='none')
-                plt.savefig("images/" + game.name + str(i) + ".png")
- 
+

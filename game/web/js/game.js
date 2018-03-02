@@ -23,7 +23,7 @@ function drawGame(game) {
     const [x, y, angle] = game.runner
 
     ctx.fillStyle = 'blue'
-    ctx.fillRect((x * scale) - 5, (y * scale) - 5, scale, scale)
+    ctx.fillRect((x * scale) - (scale / 4), (y * scale) - (scale / 4), scale / 2, scale / 2)
 
     const [xEnd, yEnd] = [x + Math.cos(angle), y + Math.sin(angle)]
     const size = 8
@@ -39,8 +39,6 @@ function drawGame(game) {
     game.sensorMatrix.forEach(([x, y]) => {
       x *= scale
       y *= scale
-
-      debugger
 
       ctx.fillRect(x - 1, y - 1, 2, 2)
     })
