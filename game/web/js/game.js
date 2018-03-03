@@ -6,6 +6,7 @@ eel.expose(drawGame)
 const scale = 20
 function drawGame(game) {
   console.log(game)
+  steps.textContent = game.steps
   ctx.clearRect(0, 0, 400, 400)
 
   ctx.fillStyle = 'black'

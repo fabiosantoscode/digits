@@ -30,7 +30,7 @@ class Agent:
         self.memory.memory_size = value
 
     def reset_memory(self):
-        self.exp_replay.reset_memory()
+        self.memory.reset_memory()
 
     def check_game_compatibility(self, game):
         return True
@@ -65,7 +65,7 @@ class Agent:
         else:
             final_epsilon = epsilon
         model = self.model
-        nb_actions = model.output_shape[-1]
+        nb_actions = model.get_output_shape_at(-1)[-1]
         win_count = 0
         for epoch in range(nb_epoch):
             loss = 0.
@@ -97,8 +97,7 @@ class Agent:
                         inputs, targets = batch
                         import math
                         if math.isnan(targets[0][0]):
-                            # import pdb; pdb.set_trace()
-                            pass
+                            import pdb; pdb.set_trace()
                         loss += float(model.train_on_batch(inputs, targets))
                 if checkpoint and ((epoch + 1 - observe) % checkpoint == 0 or epoch + 1 == nb_epoch):
                     model.save_weights('weights.dat')
@@ -108,7 +107,7 @@ class Agent:
                 epsilon -= delta
             print("Epoch {:03d}/{:03d} | Loss {:.4f} | Epsilon {:.2f} | Win count {}".format(epoch + 1, nb_epoch, loss, epsilon, win_count))
 
-    def play(self, game, nb_epoch=10, epsilon=0., visualize=True):
+    def play(self, game, nb_epoch=10, epsilon=0., display=True):
         self.check_game_compatibility(game)
         model = self.model
         win_count = 0
@@ -129,9 +128,9 @@ class Agent:
                     action = possible_actions[np.argmax(q)]
                 game.play(action)
                 S = self.get_game_data(game)
-                if visualize:
+                if display:
                     game.display()
-                game_over = game.is_over()
+                game_over = game.is_over(playing=True)
             if game.is_won():
                 win_count += 1
         print("Accuracy {} %".format(100. * win_count / nb_epoch))

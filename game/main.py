@@ -6,26 +6,25 @@ from keras.optimizers import *
 from agent import Agent
 from game import Game
 
-sensor_grid_length = 30
+sensor_shape = (30,)
 hidden_size = 100
-nb_frames = 10
+nb_frames = 1
 
-action_count = 2
+action_count = Game.nb_actions
 
 model = Sequential()
-model.add(Flatten(input_shape=(nb_frames, sensor_grid_length)))
-model.add(Dense(hidden_size, activation='relu'))
-model.add(Dense(hidden_size, activation='relu'))
-model.add(Dense(hidden_size, activation='relu'))
+model.add(Flatten(input_shape=(nb_frames, *sensor_shape)))
+model.add(Dense(hidden_size))
+model.add(Dense(hidden_size))
 model.add(Dense(action_count))
-model.compile(sgd(lr=.2), "mse")
+model.compile(optimizer='rmsprop', loss="mse")
 
 game = Game()
 agent = Agent(model=model)
 
 @eel.expose
 def play_game():
-    agent.train(game, batch_size=10, nb_epoch=1000, epsilon=.1)
+    agent.train(game, batch_size=1, nb_epoch=200, epsilon=.1, observe=5, reset_memory=True)
     print('trained')
     agent.play(game)
 

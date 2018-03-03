@@ -33,8 +33,10 @@ class Game:
     def is_won(self):
         return self.steps >= 100
 
-    def is_over(self):
-        return self.ended
+    def is_over(self, playing=False):
+        if playing:
+            return self.ended
+        return self.ended or self.is_won()
 
     def get_sensor_matrix(self, all=False, as_bools=False):
         runner_x, runner_y, runner_angle = self.runner
@@ -52,16 +54,17 @@ class Game:
 
                 if all or not self.track.is_occupied(sens_x, sens_y):
                     if as_bools:
-                        sensors.append(int(not self.track.is_occupied(sens_x, sens_y)))
+                        sensors.append(float(int(not self.track.is_occupied(sens_x, sens_y))))
                     else:
                         sensors.append((sens_x, sens_y))
 
         if all:
             assert len(sensors) == 30, "len sensors is %d" % len(sensors)
+
         return sensors
 
     def get_score(self):
-        return len(self.get_sensor_matrix(all=False)) - (self.steps / 10)
+        return len(self.get_sensor_matrix(all=False)) + (self.steps)
 
     def get_frame(self):
         return np.array(self.get_sensor_matrix(all=True, as_bools=True))
@@ -70,17 +73,17 @@ class Game:
         eel.drawGame(self.to_json())
         time.sleep(0.1)
 
-    nb_actions = 2
+    nb_actions = 5
 
     def action_space(self):
-        return [-1, 1]
+        return [-1, -0.5, 0, 0.5, 1]
 
     def get_possible_actions(self):
-        return [0, 1]
+        return list(range(self.nb_actions))
 
     def play(self, action):
         # assert action in self.action_space(), "expected action to be -1 or 1, was {}".format(action)
-        assert action in [0, 1]
+        assert action in self.get_possible_actions()
         action = self.action_space()[action]
         self.steps += 1
         x, y, angle = self.runner
@@ -97,6 +100,7 @@ class Game:
 
     def to_json(self):
         return {
+            'steps': self.steps,
             'track': self.track.track,
             'runner': self.runner,
             'sensorMatrix': self.sensor_matrix
