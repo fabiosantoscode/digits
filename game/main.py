@@ -5,8 +5,9 @@ from qlearning4k.games import Catch
 from keras.optimizers import *
 from agent import Agent
 from game import Game
+from geventwebsocket.exceptions import WebSocketError
 
-sensor_shape = (30,)
+sensor_shape = (Game.sensor_count,)
 hidden_size = 100
 nb_frames = 1
 
@@ -24,9 +25,12 @@ agent = Agent(model=model)
 
 @eel.expose
 def play_game():
-    agent.train(game, batch_size=1, nb_epoch=200, epsilon=.1, observe=5, reset_memory=True)
-    print('trained')
-    agent.play(game)
+    try:
+        agent.train(game, batch_size=10, nb_epoch=100, epsilon=.1, observe=5, reset_memory=False)
+        print('trained')
+        agent.play(game)
+    except WebSocketError:
+        exit(0)
 
 eel.init('web')
 eel.start('main.html')

@@ -38,13 +38,15 @@ class Game:
             return self.ended
         return self.ended or self.is_won()
 
+    sensor_count = 12 * 9
+
     def get_sensor_matrix(self, all=False, as_bools=False):
         runner_x, runner_y, runner_angle = self.runner
         sine, cosine = math.sin(runner_angle), math.cos(runner_angle)
         sensors = []
 
-        for x in map(lambda x: x / 2, range(0, 6)):
-            for y in map(lambda x: x / 2, range(-2, 3)):
+        for x in map(lambda x: x / 4, range(0, 12)):
+            for y in map(lambda x: x / 3, range(-4, 5)):
                 sens_x, sens_y = (
                     x * cosine - y * sine,
                     y * cosine + x * sine
@@ -59,7 +61,7 @@ class Game:
                         sensors.append((sens_x, sens_y))
 
         if all:
-            assert len(sensors) == 30, "len sensors is %d" % len(sensors)
+            assert len(sensors) == self.sensor_count, "len sensors is %d" % len(sensors)
 
         return sensors
 

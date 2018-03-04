@@ -36,7 +36,7 @@ function drawGame(game) {
   }
 
   if (game.sensorMatrix) {
-    ctx.fillStyle = 'red'
+    ctx.fillStyle = 'pink'
     game.sensorMatrix.forEach(([x, y]) => {
       x *= scale
       y *= scale
