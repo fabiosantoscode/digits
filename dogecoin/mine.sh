@@ -1,4 +1,6 @@
 #!/bin/bash
 
-curl 'https://poloniex.com/public?command=returnChartData&currencyPair=BTC_DOGE&start=1455101400&end=9999999999&period=1800' | jq 'map(.close)' > data.json
+seconds_in_24_hrs=86400
+
+curl 'https://poloniex.com/public?command=returnChartData&currencyPair=BTC_DOGE&start=0&end=9999999999&period='${seconds_in_24_hrs} | jq 'map(.close)' > data.json
 
